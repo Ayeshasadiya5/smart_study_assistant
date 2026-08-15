@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}AI Doubt Assistant - SmartNotes AI{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="page-header mb-3">
+        <h2><i class="fas fa-robot me-2"></i>AI Doubt Assistant</h2>
+        {% if session_context.subject %}
+        <div class="context-badge mt-2">
+            <span>Regulation: <strong>{{ session_context.regulation }}</strong></span>
+            <span class="mx-2">|</span>
+            <span>Subject: <strong>{{ session_context.subject }}</strong></span>
+        </div>
+        {% else %}
+        <p class="text-muted">Search for a subject on the dashboard first for better context-aware answers.</p>
+        {% endif %}
+    </div>
+
+    {% if not ai_enabled %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        AI features are disabled. Set <code>GEMINI_API_KEY</code> in your <code>.env</code> file.
+    </div>
+    {% endif %}
+
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai-message">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    Hello! Ask me about concepts, definitions, exam topics, or important questions for your subject and regulation.
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="form-control" placeholder="Ask your doubt..." {% if not ai_enabled %}disabled{% endif %}>
+            <button id="chatSend" class="btn btn-primary" {% if not ai_enabled %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    window.CHAT_CONFIG = {
+        askUrl: "{{ url_for('ai.ask') }}",
+        materialId: {{ request.args.get('material_id') or 'null' }}
+    };
+</script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+{% endblock %}

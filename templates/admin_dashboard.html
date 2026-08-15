@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - SmartNotes AI{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h2><i class="fas fa-cog me-2"></i>Admin Dashboard</h2>
+            <p class="text-muted mb-0">Manage subjects and study materials</p>
+        </div>
+        <a href="{{ url_for('admin.upload') }}" class="btn btn-primary">
+            <i class="fas fa-upload me-2"></i>Upload PDF
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="dashboard-card">
+                <h5 class="mb-3"><i class="fas fa-plus me-2"></i>Add Subject</h5>
+                <form method="POST" action="{{ url_for('admin.add_subject') }}">
+                    <div class="mb-2">
+                        <input type="text" name="name" class="form-control form-control-sm" placeholder="Subject Name" required>
+                    </div>
+                    <div class="mb-2">
+                        <input type="text" name="subject_code" class="form-control form-control-sm" placeholder="Subject Code (optional)">
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <select name="year" class="form-select form-select-sm" required>
+                                {% for y in years %}
+                                <option value="{{ y }}">{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select name="semester" class="form-select form-select-sm" required>
+                                {% for s in semesters %}
+                                <option value="{{ s }}">{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="description" class="form-control form-control-sm" rows="2" placeholder="Description (optional)"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Add Subject</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="dashboard-card">
+                <h5 class="mb-3"><i class="fas fa-list me-2"></i>Subjects ({{ subjects|length }})</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Name</th><th>Code</th><th>Year</th><th>Semester</th></tr></thead>
+                        <tbody>
+                            {% for sub in subjects %}
+                            <tr>
+                                <td>{{ sub.name }}</td>
+                                <td>{{ sub.subject_code or '-' }}</td>
+                                <td>{{ sub.year }}</td>
+                                <td>{{ sub.semester }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-muted">No subjects yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <h5 class="mb-3"><i class="fas fa-file-pdf me-2"></i>Uploaded Materials ({{ materials|length }})</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>Unit</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in materials %}
+                    <tr>
+                        <td>{{ m.title }}</td>
+                        <td>{{ m.subject.name }}</td>
+                        <td><span class="badge bg-primary">{{ m.material_type }}</span></td>
+                        <td>{{ m.unit or '-' }}</td>
+                        <td>{{ m.upload_date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.delete_material', material_id=m.id) }}" class="d-inline"
+                                  onsubmit="return confirm('Delete this material?');">
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-muted">No materials uploaded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

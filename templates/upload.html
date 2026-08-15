@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Upload PDF - SmartNotes AI{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="page-header mb-4">
+        <h2><i class="fas fa-upload me-2"></i>Upload Study Material</h2>
+        <p class="text-muted">Upload PDF files. They will be automatically processed for AI search.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="dashboard-card">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">PDF File <span class="text-danger">*</span></label>
+                        <input type="file" name="pdf_file" class="form-control" accept=".pdf,application/pdf" required>
+                        <small class="text-muted">Max size: 16 MB. Only PDF files allowed.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" required placeholder="e.g. Machine Learning Unit 1 Notes">
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Year <span class="text-danger">*</span></label>
+                            <select name="year" class="form-select" required>
+                                {% for y in years %}
+                                <option value="{{ y }}">{{ y }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Semester <span class="text-danger">*</span></label>
+                            <select name="semester" class="form-select" required>
+                                {% for s in semesters %}
+                                <option value="{{ s }}">{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Subject <span class="text-danger">*</span></label>
+                            <select name="subject_id" class="form-select" required>
+                                <option value="">Select Subject</option>
+                                {% for sub in subjects %}
+                                <option value="{{ sub.id }}">{{ sub.name }} ({{ sub.year }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Material Type <span class="text-danger">*</span></label>
+                            <select name="material_type" class="form-select" required>
+                                {% for mt in material_types %}
+                                <option value="{{ mt }}">{{ mt }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Unit</label>
+                            <input type="text" name="unit" class="form-control" placeholder="e.g. Unit 1">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Short description of the material"></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload PDF
+                        </button>
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Home - SmartNotes AI{% endblock %}
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <div class="hero-icon mb-3"><i class="fas fa-graduation-cap"></i></div>
+            <h1 class="hero-title">Smart Student Notes & AI Doubt Assistant</h1>
+            <p class="hero-subtitle">Built for Engineering (B.Tech) students — find notes, papers, and get AI help for your subjects.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
+                {% if current_user.is_authenticated and not current_user.is_admin %}
+                <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-search me-2"></i>Go to Dashboard
+                </a>
+                <a href="{{ url_for('ai.chat_page') }}" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fas fa-robot me-2"></i>AI Assistant
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4">Get Started</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-file-pdf feature-icon"></i>
+                <h5>Study Materials</h5>
+                <p>Find lecture notes, unit notes, previous papers, and more by year, semester, and subject.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-robot feature-icon"></i>
+                <h5>AI Doubt Assistant</h5>
+                <p>Ask academic doubts and get clear explanations powered by your uploaded study materials.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card">
+                <i class="fas fa-question-circle feature-icon"></i>
+                <h5>Important Questions</h5>
+                <p>Generate AI-powered exam questions for any subject and unit to boost your preparation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Study Materials - SmartNotes AI{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h2 id="resultsHeading">Study Materials</h2>
+            <h4 class="text-primary mb-1" id="resultsSubject">
+                {% if subject_name %}{{ subject_name }}{% endif %}
+            </h4>
+            <p class="text-muted mb-0" id="resultsSubheading">
+                {% if regulation %}{{ regulation }}{% endif %}
+            </p>
+        </div>
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div id="searchLoading" class="search-loading-card text-center py-5" {% if not auto_search %}style="display:none"{% endif %}>
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <h5>Searching the web for study materials...</h5>
+        <p class="text-muted mb-1">Searching multiple educational sources...</p>
+        <p class="text-muted small">Finding notes, PDFs, question papers and study resources...</p>
+    </div>
+
+    <div id="searchError" class="alert alert-danger" style="display:none;"></div>
+
+    <div id="searchResults" class="row g-4" style="display:none;"></div>
+
+    <div id="searchEmpty" class="empty-state text-center py-5" style="display:none;">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h4>No study materials were found for this subject.</h4>
+        <p class="text-muted">Try:</p>
+        <ul class="text-muted list-unstyled">
+            <li>&bull; Checking the subject name spelling</li>
+            <li>&bull; Using the full subject name</li>
+            <li>&bull; Trying an alternative subject name</li>
+        </ul>
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary mt-2">Search Again</a>
+    </div>
+
+    {% if not auto_search %}
+    <div class="empty-state text-center py-5" id="noSearchPrompt">
+        <i class="fas fa-keyboard fa-3x text-muted mb-3"></i>
+        <h4>Enter search details</h4>
+        <p class="text-muted">Go to the dashboard, select regulation, and type your subject name.</p>
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.MATERIALS_SEARCH = {
+    autoSearch: {{ 'true' if auto_search else 'false' }},
+    regulation: "{{ regulation|e }}",
+    subjectName: "{{ subject_name|e }}",
+    apiUrl: "{{ url_for('student.api_search_materials') }}"
+};
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text || '';
+    return d.innerHTML;
+}
+
+function renderResults(results) {
+    const container = document.getElementById('searchResults');
+    container.innerHTML = '';
+
+    results.forEach(function (r) {
+        const isLocal = r.is_local || (r.url && r.url.startsWith('/view/'));
+        const openUrl = isLocal ? r.url : r.url;
+        const target = isLocal ? '_self' : '_blank';
+        const rel = isLocal ? '' : 'noopener noreferrer';
+        const typeBadge = r.is_pdf ? 'bg-danger' : 'bg-primary';
+        const regBadge = r.regulation_match
+            ? '<span class="badge bg-success ms-1">Regulation Match</span>' : '';
+
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        card.innerHTML =
+            '<div class="material-card web-result-card">' +
+            '<div class="material-card-header">' +
+            '<i class="fas fa-' + (r.is_pdf ? 'file-pdf' : 'globe') + '"></i>' +
+            '<span class="badge ' + typeBadge + '">' + escapeHtml(r.type || 'Resource') + '</span>' +
+            regBadge +
+            '</div>' +
+            '<h5 class="material-title">' + escapeHtml(r.title) + '</h5>' +
+            '<p class="material-meta"><i class="fas fa-link me-1"></i>Source: ' + escapeHtml(r.source) + '</p>' +
+            (r.description ? '<p class="material-desc">' + escapeHtml(r.description) + '</p>' : '') +
+            '<div class="material-actions">' +
+            '<a href="' + escapeHtml(openUrl) + '" target="' + target + '" rel="' + rel + '" class="btn btn-primary btn-sm">' +
+            '<i class="fas fa-external-link-alt me-1"></i>Open Resource</a>' +
+            '</div></div>';
+        container.appendChild(card);
+    });
+}
+
+async function runSearch() {
+    const cfg = window.MATERIALS_SEARCH;
+    if (!cfg.autoSearch) return;
+
+    document.getElementById('searchLoading').style.display = 'block';
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchEmpty').style.display = 'none';
+    document.getElementById('searchError').style.display = 'none';
+    const prompt = document.getElementById('noSearchPrompt');
+    if (prompt) prompt.style.display = 'none';
+
+    const params = new URLSearchParams({
+        regulation: cfg.regulation,
+        subject_name: cfg.subjectName
+    });
+
+    try {
+        const res = await fetch(cfg.apiUrl + '?' + params.toString());
+        const data = await res.json();
+        document.getElementById('searchLoading').style.display = 'none';
+
+        if (!data.success) {
+            document.getElementById('searchError').textContent = data.error || 'Search failed.';
+            document.getElementById('searchError').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('resultsHeading').textContent = 'Study Materials';
+        document.getElementById('resultsSubject').textContent = data.subject_name;
+        document.getElementById('resultsSubheading').textContent = data.regulation;
+
+        if (!data.results || data.results.length === 0) {
+            document.getElementById('searchEmpty').style.display = 'block';
+            return;
+        }
+
+        renderResults(data.results);
+        document.getElementById('searchResults').style.display = 'flex';
+    } catch (e) {
+        document.getElementById('searchLoading').style.display = 'none';
+        document.getElementById('searchError').textContent =
+            'Could not complete the search. Please check your connection and try again.';
+        document.getElementById('searchError').style.display = 'block';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', runSearch);
+</script>
+{% endblock %}

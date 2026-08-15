@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Generate Questions - SmartNotes AI{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="page-header mb-4">
+        <h2><i class="fas fa-question-circle me-2"></i>Generate Important Questions</h2>
+        <p class="text-muted">AI-generated, regulation-aware exam questions — type any subject name.</p>
+    </div>
+
+    <div class="dashboard-card mb-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Regulation</label>
+                <select id="questionRegulation" class="form-select">
+                    {% for r in regulations %}
+                    <option value="{{ r }}" {% if session_context.regulation == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Subject Name</label>
+                <input type="text" id="questionSubject" class="form-control"
+                       placeholder="e.g. Machine Learning"
+                       value="{{ session_context.subject or '' }}" maxlength="120">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Unit (optional)</label>
+                <input type="text" id="questionUnit" class="form-control" placeholder="Unit 1">
+            </div>
+        </div>
+        <button id="generateBtn" class="btn btn-primary mt-3">
+            <i class="fas fa-magic me-2"></i>Generate Questions
+        </button>
+    </div>
+
+    <div id="questionsLoading" class="text-center py-5" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Generating AI questions...</p>
+    </div>
+
+    <div id="questionsResult" class="dashboard-card" style="display:none;">
+        <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="mb-0" id="questionsTitle"></h5>
+            <span class="badge bg-info">AI-Generated</span>
+        </div>
+        <div id="questionsContent" class="questions-content"></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('generateBtn').addEventListener('click', async function() {
+    const regulation = document.getElementById('questionRegulation').value;
+    const subjectName = document.getElementById('questionSubject').value.trim();
+    const unit = document.getElementById('questionUnit').value.trim();
+
+    if (!subjectName) {
+        alert('Please enter a subject name.');
+        return;
+    }
+
+    document.getElementById('questionsLoading').style.display = 'block';
+    document.getElementById('questionsResult').style.display = 'none';
+
+    try {
+        const res = await fetch('{{ url_for("ai.generate_questions") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ regulation, subject_name: subjectName, unit })
+        });
+        const data = await res.json();
+        document.getElementById('questionsLoading').style.display = 'none';
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        document.getElementById('questionsTitle').textContent =
+            data.subject + ' (' + data.regulation + ')' +
+            (data.unit ? ' – ' + data.unit : '') + ' – Important Questions';
+        document.getElementById('questionsContent').innerHTML =
+            '<pre class="questions-pre">' + data.questions + '</pre>';
+        document.getElementById('questionsResult').style.display = 'block';
+    } catch (e) {
+        document.getElementById('questionsLoading').style.display = 'none';
+        alert('Failed to generate questions. Please try again.');
+    }
+});
+</script>
+{% endblock %}
