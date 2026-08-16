@@ -12,6 +12,7 @@ from routes.admin import admin_bp
 from routes.ai import ai_bp
 
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -115,7 +116,6 @@ def _seed_admin(app):
         db.session.add(admin)
         db.session.commit()
         print('Default admin created: admin@smartnotes.ai / admin123')
-
 
 app = create_app()
 
