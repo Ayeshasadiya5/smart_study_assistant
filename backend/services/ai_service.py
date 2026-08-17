@@ -1,5 +1,5 @@
 from config import Config
-from services.rag_service import rag_service
+from backend.services.rag_service import rag_service
 
 
 class AIService:

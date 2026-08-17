@@ -5,16 +5,20 @@ from flask import Flask, render_template, redirect, url_for
 from flask_login import current_user
 from flask_login import LoginManager
 from config import Config
-from database.models import db, User
-from routes.auth import auth_bp
-from routes.student import student_bp
-from routes.admin import admin_bp
-from routes.ai import ai_bp
+from backend.database.models import db, User
+from backend.routes.auth import auth_bp
+from backend.routes.student import student_bp
+from backend.routes.admin import admin_bp
+from backend.routes.ai import ai_bp
 
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(
+    __name__,
+    template_folder='backend/templates',
+    static_folder='backend/static'
+)
     app.config.from_object(Config)
 
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)

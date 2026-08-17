@@ -1,10 +1,10 @@
 import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
-from database.models import db, Subject, StudyMaterial
-from services.pdf_processor import validate_pdf_file, generate_safe_filename
-from services.rag_service import rag_service
-from routes.auth import admin_required
+from backend.database.models import db, Subject, StudyMaterial
+from backend.services.pdf_processor import validate_pdf_file, generate_safe_filename
+from backend.services.rag_service import rag_service
+from backend.routes.auth import admin_required
 from config import Config
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')

@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required, current_user
-from database.models import db, ChatHistory
-from services.ai_service import ai_service
-from services.search_service import (
+from backend.database.models import db, ChatHistory
+from backend.services.ai_service import ai_service
+from backend.services.search_service import (
     sanitize_subject_name,
     sanitize_regulation,
     build_web_context_for_ai,

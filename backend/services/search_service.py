@@ -531,7 +531,7 @@ def get_local_uploaded_materials(
 
     try:
 
-        from database.models import (
+        from backend.database.models import (
             StudyMaterial,
             Subject
         )

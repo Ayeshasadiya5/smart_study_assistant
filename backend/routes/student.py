@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, send_file, abort, jsonify
 from flask_login import login_required, current_user
-from database.models import db, StudyMaterial, SearchHistory
-from services.search_service import (
-    search_study_materials,
+from backend.database.models import db, StudyMaterial, SearchHistory
+from backend.services.search_service import (    search_study_materials,
     sanitize_subject_name,
     sanitize_regulation,
     build_web_context_for_ai,

@@ -40,7 +40,7 @@ class RAGService:
             except ImportError:
                 from langchain.text_splitter import RecursiveCharacterTextSplitter
             from langchain_community.vectorstores import FAISS
-            from services.pdf_processor import extract_text_from_pdf
+            from backend.services.pdf_processor import extract_text_from_pdf
 
             chunks = extract_text_from_pdf(filepath)
             if not chunks:
@@ -148,7 +148,7 @@ class RAGService:
             del self._vectorstores[material_id]
 
     def get_material_ids_for_subject(self, subject_id, db_session):
-        from database.models import StudyMaterial
+        from backend.database.models import StudyMaterial
         materials = db_session.query(StudyMaterial).filter_by(subject_id=subject_id).all()
         valid_ids = []
         for m in materials:
